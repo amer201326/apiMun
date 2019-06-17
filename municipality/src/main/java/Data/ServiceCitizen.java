@@ -28,6 +28,8 @@ public class ServiceCitizen implements Serializable {
 
     int idMaxSC;
 
+    int percentageWork;
+    
     int Service_Citizen_ID;
     int Services_Provided_ID;
     int Cit_ID;
@@ -1132,6 +1134,14 @@ public class ServiceCitizen implements Serializable {
     public void setImportantCommentIsNO(boolean importantCommentIsNO) {
         this.importantCommentIsNO = importantCommentIsNO;
     }
+
+	public int getPercentageWork() {
+		return percentageWork;
+	}
+
+	public void setPercentageWork(int percentageWork) {
+		this.percentageWork = percentageWork;
+	}
     
     
 

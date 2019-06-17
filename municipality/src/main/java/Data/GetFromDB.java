@@ -1508,9 +1508,9 @@ public class GetFromDB {
     }
 
     public static List<StepsAndDecsions> StepsAndDesion(int idcitizen, int idSerCit, int idService) {
-    	//List<AttachmentServiceEmployee> attachmentServiceEmployee = GetFromDBaraa.AttachmentServiceEmployee(idcitizen, idSerCit, idService);;
+    	List<AttachmentServiceEmployee> attachmentServiceEmployee = GetFromDBaraa.AttachmentServiceEmployee(idcitizen, idSerCit, idService);;
         List<StepsAndDecsions> pathD = GetFromDBaraa.stepAndDecDep(idcitizen, idSerCit);
-        List<DecisionSection> pathS = GetFromDBaraa.sectionsteps(idService);
+        List<DecisionSection> pathS = GetFromDBaraa.sectionsteps(idcitizen,idSerCit,idService);
         List<StepsAndDecsionsJob> pathJ = GetFromDBaraa.stepAndDecJop(idcitizen, idSerCit);
 
         System.out.println("lllll" + pathD.size());
@@ -1525,13 +1525,13 @@ public class GetFromDB {
                             s.getJob().add(j);
                             d.decisionsDepartment.setTotalDepCost(d.decisionsDepartment.getTotalDepCost() + j.decisionsJob.getCost());
 
-//                            for (AttachmentServiceEmployee att : attachmentServiceEmployee) {
-//                                if (att.getEmp_ID() == j.decisionsJob.getIdEmployee()) {
-//                                    //j.setAttachmentServiceEmployee(att);
-//                                    j.getAttachmentServiceEmployee().add(att);
-//
-//                                }
-//                            }
+                            for (AttachmentServiceEmployee att : attachmentServiceEmployee) {
+                            	 att.inputForData = null;
+                                if (att.getEmp_ID() == j.decisionsJob.getIdEmployee()) {
+                                    //j.setAttachmentServiceEmployee(att);
+                                    j.getAttachmentServiceEmployee().add(att);
+                                }
+                            }
 
                         }
                     }
@@ -1541,6 +1541,9 @@ public class GetFromDB {
         }
         return pathD;
     }
+
+    
+    
     public static ServiceAttachmentName getAttachmentService(int id) {
         
     	ServiceAttachmentName attach = new ServiceAttachmentName();
@@ -1599,6 +1602,26 @@ public class GetFromDB {
         return attach;
     }
 
+ public static AttachmentServiceEmployee getAttachmentSE(int id) {
+        
+	 AttachmentServiceEmployee attach = null;
+    	
+        try {
+            DB db = new DB();
+            String sql = "SELECT * FROM oss.attachment_service_employee where Attachment_Service_Employee_ID ="+id+";";
+            System.out.println(sql);
+            ResultSet r = db.read(sql);
+            while (r.next()) {
+            	attach = new AttachmentServiceEmployee(r.getInt(1), r.getInt(2), r.getInt(3), r.getInt(4),  r.getInt(5), r.getBinaryStream(6), r.getString(7));
+            }
+
+        } catch (SQLException | ClassNotFoundException ex) {
+            Logger.getLogger(GetFromDB.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+        return attach;
+    }
+ 
 	public static void addNewServiceCitizen(int idMax, int idSer, int idCit, String note) {
 		// TODO Auto-generated method stub
 		ServiceCitizen serviceCitizen = new ServiceCitizen(idMax, idSer, idCit, note);

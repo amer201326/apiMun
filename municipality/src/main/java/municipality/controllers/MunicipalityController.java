@@ -29,6 +29,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import Data.AttFileTex;
 import Data.AttachmentArchiveCitizen;
+import Data.AttachmentServiceEmployee;
 import Data.Citizen;
 import Data.CitizenAccount;
 import Data.CitizenRequest;
@@ -198,6 +199,51 @@ public class MunicipalityController {
 	}
 	
 	
+	@RequestMapping(method = RequestMethod.GET,value = "/fileAttEmp")
+	public void fileAttEmp(HttpServletRequest request, HttpServletResponse response, @RequestParam int idAtt)  {
+
+		System.out.println("fileee");
+
+		AttachmentServiceEmployee asn  = GetFromDB.getAttachmentSE(idAtt);
+		
+			//get the mimetype
+			String mimeType = URLConnection.guessContentTypeFromName(asn.getFilename());
+			if (mimeType == null) {
+				//unknown mimetype so set the mimetype to application/octet-stream
+				mimeType = "application/octet-stream";
+			}
+
+			response.setContentType(mimeType);
+			response.setHeader("Content-Disposition", String.format("inline; filename=\"" + asn.getFilename() + "\""));
+			try {
+				FileCopyUtils.copy(asn.inputForData, response.getOutputStream());
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		
+			
+	}
+	@RequestMapping(method = RequestMethod.GET,value = "/fileAttTexE")
+	public AttFileTex fileAttTexE(@RequestParam int idAttTex)  {
+
+		System.out.println("fileee");
+		AttachmentServiceEmployee asn  = GetFromDB.getAttachmentSE(idAttTex);
+		AttFileTex af = new AttFileTex();
+		af.setName(asn.getFilename());
+		try {
+			byte[] b = new byte[asn.inputForData.available()];
+			asn.inputForData.read(b);
+		    af.setS( new String(b));
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		System.out.println();
+		return af;
+			
+	}
 	@RequestMapping(method = RequestMethod.POST, value = "/test")
 	public void test(@RequestBody String s){
 		//System.out.println("s="+s);
@@ -225,7 +271,7 @@ public class MunicipalityController {
 		File newFile = new File("/Users/baraakali/Desktop/testt.jpg");
 		  try {
 			  
-			 newFile.createNewFile();
+			  newFile.createNewFile();
 		      FileOutputStream fOut = new FileOutputStream(newFile);
 		      fOut.write(file.getBytes());
 		      fOut.close();

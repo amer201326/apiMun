@@ -54,6 +54,7 @@ public class GetFromDBaraa {
                 sc = new ServiceCitizen(r.getInt(1), r.getInt(2), r.getInt(3), r.getString(4), r.getString(5), r.getString(6));
                 sc.service = new Service(r.getInt(7), r.getString(8), r.getInt(9), r.getInt(10), r.getString(11), new Department(r.getInt(12)), new Section(r.getString(13)), r.getString(14));
                 services.add(sc);
+                sc.percentageWork = 20;
             }
         } catch (Exception e) {
             System.out.println(e.getMessage());
@@ -198,19 +199,22 @@ public class GetFromDBaraa {
         System.out.println("size isL" + Lsdj.size());
         return Lsdj;
     }
-
-    public static ArrayList<DecisionSection> sectionsteps(int idservice) {
+    public static ArrayList<DecisionSection> sectionsteps(int idcitizen, int idSerCit, int idService) {
         ArrayList<DecisionSection> sections = new ArrayList<>();
         try {
             DB db = new DB();
             SectionPath sp;
             DecisionSection s;
-            String sql = "SELECT * FROM steps_section as ss  inner join section as s on ss.Sec_ID = s.Sec_ID where ss.Services_Provided_ID = " + idservice + " ;";
+            String sql = "SELECT * FROM dicisions_section as ds inner join steps_section as ss on "
+                    + " ds.Dep_ID = ss.Dep_ID and ds.Sec_ID = ss.Sec_ID and ds.Services_Provided_ID = ss.Services_Provided_ID and ds.Order_Departmant = ss.Order_Departmant "
+                    + " and  ds.Order_Section = ss.Order_Section "
+                    + " inner join section as s on ds.Sec_ID = s.Sec_ID "
+                    + " where ss.Services_Provided_ID = "+idService+" and ds.Service_Citizen_ID = "+idSerCit+" and ds.Cit_ID = "+idcitizen+";";
             System.out.println(sql);
             ResultSet r = db.read(sql);
             while (r.next()) {
-                sp = new SectionPath(r.getInt(1), r.getInt(4), r.getInt(2), r.getString(8), r.getInt(5));
-                s = new DecisionSection();
+                sp = new SectionPath(r.getInt(1), r.getInt(4), r.getInt(2), r.getString(16), r.getInt(5));
+                s = new DecisionSection(sp, idcitizen, idcitizen, idService, r.getString(7));
                 s.setSection(sp);;
                 sections.add(s);
             }
@@ -221,6 +225,7 @@ public class GetFromDBaraa {
         return sections;
 
     }
+    
 
 //    public static void ApplyService(int Cit_ID, int Services_Provided_ID, List<ServiceAttachmentName> allAttachment,String note) {
 //

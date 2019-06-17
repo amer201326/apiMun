@@ -32,6 +32,8 @@ import org.primefaces.model.UploadedFile;
  */
 public class AttachmentServiceEmployee implements Serializable {
 
+	public InputStream inputForData;
+	
     int Attachment_Service_Employee_ID;
     int Emp_ID, Cit_ID;
     int Service_Citizen_ID;
@@ -67,9 +69,9 @@ public class AttachmentServiceEmployee implements Serializable {
 //            File a = new File(absoluteDiskPath);
 //            System.out.println(a.getAbsolutePath());
             
-            outputfinal = new byte[file.available()];
-            file.read(outputfinal);
-            this.inputStreamFile = new ByteArrayInputStream( outputfinal);
+//            outputfinal = new byte[file.available()];
+//            file.read(outputfinal);
+//            this.inputStreamFile = new ByteArrayInputStream( outputfinal);
 //
 //            OutputStream outStream = new FileOutputStream(a);
 //            outStream.write(buffer);
@@ -79,8 +81,8 @@ public class AttachmentServiceEmployee implements Serializable {
             Logger.getLogger(AttachmentServiceEmployee.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
-    public byte[] outputfinal;
     
+    //me
     public AttachmentServiceEmployee(int Attachment_Service_Employee_ID, int Emp_ID, int Cit_ID,
             int Service_Citizen_ID, int Services_Provided_ID, InputStream inputStream, String filename ) {
         this.Attachment_Service_Employee_ID = Attachment_Service_Employee_ID;
@@ -88,15 +90,15 @@ public class AttachmentServiceEmployee implements Serializable {
         this.Cit_ID = Cit_ID;
         this.Service_Citizen_ID = Service_Citizen_ID;
         this.Services_Provided_ID = Services_Provided_ID;
-       
+        System.out.println("me");
         this.filename = filename;
         if (inputStream != null) {
             try {
                 si = inputStream.available();
                 byte[] inputByte = new byte[inputStream.available()];
                 inputStream.read(inputByte);
-                outputfinal = Crypto.dec(Cipher.DECRYPT_MODE, "foreanderDowntop", inputByte);
-                InputStream inputForData = new ByteArrayInputStream(outputfinal);
+                byte[] outputfinalar = Crypto.dec(Cipher.DECRYPT_MODE, "foreanderDowntop", inputByte);
+                this.inputForData = new ByteArrayInputStream(outputfinalar);
 
                 fileDownload = new DefaultStreamedContent(inputForData, "file", filename);
 
@@ -124,7 +126,7 @@ public class AttachmentServiceEmployee implements Serializable {
                 si = inputStream.available();
                 byte[] inputByte = new byte[inputStream.available()];
                 inputStream.read(inputByte);
-                outputfinal = Crypto.dec(Cipher.DECRYPT_MODE, "foreanderDowntop", inputByte);
+                byte[] outputfinal = Crypto.dec(Cipher.DECRYPT_MODE, "foreanderDowntop", inputByte);
                 InputStream inputForData = new ByteArrayInputStream(outputfinal);
 
                 fileDownload = new DefaultStreamedContent(inputForData, "file", filename);
@@ -189,13 +191,13 @@ public class AttachmentServiceEmployee implements Serializable {
         this.Services_Provided_ID = Services_Provided_ID;
     }
 
-    public InputStream getInputStreamFile() {
-        return inputStreamFile;
-    }
-
-    public void setInputStreamFile(InputStream inputStreamFile) {
-        this.inputStreamFile = inputStreamFile;
-    }
+//    public InputStream getInputStreamFile() {
+//        return inputStreamFile;
+//    }
+//
+//    public void setInputStreamFile(InputStream inputStreamFile) {
+//        this.inputStreamFile = inputStreamFile;
+//    }
 
     public String getFilename() {
         return filename;
@@ -205,14 +207,14 @@ public class AttachmentServiceEmployee implements Serializable {
         this.filename = filename;
     }
 
-    public StreamedContent getFileDownload() {
-        System.out.println("get file downloafd");
-        return fileDownload;
-    }
-
-    public void setFileDownload(StreamedContent fileDownload) {
-        this.fileDownload = fileDownload;
-    }
+//    public StreamedContent getFileDownload() {
+//        System.out.println("get file downloafd");
+//        return fileDownload;
+//    }
+//
+//    public void setFileDownload(StreamedContent fileDownload) {
+//        this.fileDownload = fileDownload;
+//    }
 
     public void addToDataBase() throws SQLException, ClassNotFoundException {
 
@@ -284,14 +286,14 @@ public class AttachmentServiceEmployee implements Serializable {
         }
 
     }
-
-    public long getSel() {
-        return sel;
-    }
-
-    public void setSel(long sel) {
-        this.sel = sel;
-    }
+//
+//    public long getSel() {
+//        return sel;
+//    }
+//
+//    public void setSel(long sel) {
+//        this.sel = sel;
+//    }
 
     public String typ() {
         if (filename != null) {
@@ -336,12 +338,6 @@ public class AttachmentServiceEmployee implements Serializable {
         this.si = si;
     }
 
-    public byte[] getOutputfinal() {
-        return outputfinal;
-    }
 
-    public void setOutputfinal(byte[] outputfinal) {
-        this.outputfinal = outputfinal;
-    }
 
 }
