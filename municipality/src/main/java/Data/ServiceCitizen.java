@@ -119,36 +119,36 @@ public class ServiceCitizen implements Serializable {
             data.write(q);
             System.out.println("  size _>" + attachment.size());
 
-            for (ServiceAttachmentName a : attachment) {
-                if (!a.formArchevCitizen) {
-                    AttachmentArchiveCitizen attachmentArchiveCitizen = new AttachmentArchiveCitizen(idMaxAAC, Cit_ID, a.id, a.file, a.nameFile, a.name, "no");
-                    attachmentArchiveCitizen.addToDataBase();
+//            for (ServiceAttachmentName a : attachment) {
+//                if (!a.formArchevCitizen) {
+//                    AttachmentArchiveCitizen attachmentArchiveCitizen = new AttachmentArchiveCitizen(idMaxAAC, Cit_ID, a.id, a.file, a.nameFile, a.name, "no");
+//                    attachmentArchiveCitizen.addToDataBase();
+//
+//                    AttachmentServiceCitizen attachmentServiceCitizen = new AttachmentServiceCitizen(idMaxAAC, idMaxSC, Services_Provided_ID, Cit_ID);
+//                    attachmentServiceCitizen.addToDataBase();
+//                    idMaxAAC++;
+//                } else {
+//                    AttachmentServiceCitizen attachmentServiceCitizen = new AttachmentServiceCitizen(a.idAttachmentArcheveCitisen, idMaxSC, Services_Provided_ID, Cit_ID);
+//                    attachmentServiceCitizen.addToDataBase();
+//                }
+//
+//            }
 
-                    AttachmentServiceCitizen attachmentServiceCitizen = new AttachmentServiceCitizen(idMaxAAC, idMaxSC, Services_Provided_ID, Cit_ID);
-                    attachmentServiceCitizen.addToDataBase();
-                    idMaxAAC++;
-                } else {
-                    AttachmentServiceCitizen attachmentServiceCitizen = new AttachmentServiceCitizen(a.idAttachmentArcheveCitisen, idMaxSC, Services_Provided_ID, Cit_ID);
-                    attachmentServiceCitizen.addToDataBase();
-                }
+//            for (AttachmentServiceCitizen attachmentServiceCitizen : attachmentServiceCitizens) {
+//                attachmentServiceCitizen.addToDataBase();
+//            }
 
-            }
-
-            for (AttachmentServiceCitizen attachmentServiceCitizen : attachmentServiceCitizens) {
-                attachmentServiceCitizen.addToDataBase();
-            }
-
-            System.out.println("ggggggggg");
-
-            for (ServiceAttachmentName af : attwhithFile) {
-                AttachmentArchiveCitizen attachmentArchiveCitizen = new AttachmentArchiveCitizen(idMaxAAC, Cit_ID, af.id, af.file, af.nameFile, af.name, "yes");
-                attachmentArchiveCitizen.addToDataBase();
-
-                AttachmentServiceCitizen attachmentServiceCitizen = new AttachmentServiceCitizen(idMaxAAC, idMaxSC, Services_Provided_ID, Cit_ID);
-                attachmentServiceCitizen.addToDataBase();
-                idMaxAAC++;
-
-            }
+//            System.out.println("ggggggggg");
+//
+//            for (ServiceAttachmentName af : attwhithFile) {
+//                AttachmentArchiveCitizen attachmentArchiveCitizen = new AttachmentArchiveCitizen(idMaxAAC, Cit_ID, af.id, af.file, af.nameFile, af.name, "yes");
+//                attachmentArchiveCitizen.addToDataBase();
+//
+//                AttachmentServiceCitizen attachmentServiceCitizen = new AttachmentServiceCitizen(idMaxAAC, idMaxSC, Services_Provided_ID, Cit_ID);
+//                attachmentServiceCitizen.addToDataBase();
+//                idMaxAAC++;
+//
+//            }
 
             List<DepartmentPaths> departments = GetFromDBaraa.departmentPath(Services_Provided_ID);
             List<SectionPath> sections = GetFromDBaraa.sectionPath(Services_Provided_ID);
@@ -722,7 +722,6 @@ public class ServiceCitizen implements Serializable {
                 db = new DB();
                 db.write(q);
 
-                Logger.getLogger(ShoeServiceCitizemEmpManeger.class.getName()).log(Level.SEVERE, null, ex);
             } catch (SQLException ex1) {
                 Logger.getLogger(ServiceCitizen.class.getName()).log(Level.SEVERE, null, ex1);
             } catch (ClassNotFoundException ex1) {
