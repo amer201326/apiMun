@@ -263,7 +263,7 @@ public class MunicipalityController {
 		}
 	      
 	}
-	
+																																																																																																																																																																																																																																																																																																																																																																																																																																																																																							
 	@RequestMapping(method = RequestMethod.POST,consumes = MediaType.MULTIPART_FORM_DATA_VALUE , value = "/updateprofile")
 	public ServerResponse updateprofile(@RequestParam("file") MultipartFile file,@RequestParam int idSer,@RequestParam int idCit,@RequestParam int idMax,@RequestParam String form){
 		System.out.println("idSer = "+idSer);
