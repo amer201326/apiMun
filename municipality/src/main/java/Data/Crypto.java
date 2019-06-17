@@ -33,16 +33,16 @@ import org.primefaces.model.UploadedFile;
  */
 public class Crypto {
 
-//    public static void main(String[] args) {
-//        String pattern = "yyyy-MM-dd";
-//        String dateInString = new SimpleDateFormat(pattern).format(new Date());
-//        System.out.println(dateInString);
-//        System.out.println(LocalDate.now());
-//        String s = encPas("foreanderDowntop", "yaser");
-//        System.out.println(s);
-//        System.out.println(decPas("foreanderDowntop", s));
-//
-//    }
+    public static void main(String[] args) {
+        String pattern = "yyyy-MM-dd";
+        String dateInString = new SimpleDateFormat(pattern).format(new Date());
+        System.out.println(dateInString);
+        System.out.println(LocalDate.now());
+        String s = encPas("foreanderDowntop", "yaser");
+        System.out.println(s);
+        System.out.println(decPas("foreanderDowntop", s));
+
+    }
 
     public static void fileProcessor(int cipherMode, String key, File inputFile, File outputFile) {
         try {

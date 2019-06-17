@@ -23,6 +23,7 @@ public class Department implements Serializable {
     public String nameA;
     public String image;
      public int numberService;
+     String managerName;
 
     public Department() {
         
@@ -103,8 +104,10 @@ public class Department implements Serializable {
 
     @Override
     public String toString() {
-        return  nameA;
+        return "Department{" + "id=" + id + ", nameA=" + nameA + ", image=" + image + ", numberService=" + numberService + '}';
     }
+
+    
 
     public int getNumberService() {
         return numberService;
@@ -114,5 +117,13 @@ public class Department implements Serializable {
         this.numberService = numberService;
     }
 
+    public String getManagerName() {
+        return managerName;
+    }
+
+    public void setManagerName(String managerName) {
+        this.managerName = managerName;
+    }
+    
     
 }

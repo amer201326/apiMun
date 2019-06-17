@@ -47,7 +47,7 @@ public class GetFromDBaraa {
             DB db = new DB();
             ServiceCitizen sc;
             Service s;
-            String sql = "SELECT *  FROM service_citizen as sc inner join services_provided as sp on  sc.Services_Provided_ID=sp.Services_Provided_ID where ( sc.status = 'notdone' or sc.status = 'view' ) and Cit_ID=" + idcitizen + " ;";
+            String sql = "SELECT *  FROM service_citizen as sc inner join services_provided as sp on  sc.Services_Provided_ID=sp.Services_Provided_ID where ( sc.status = 'notdone' or sc.status = 'view' ) and Cit_ID=" + idcitizen + " order by Date DESC;";
             System.out.println(sql);
             ResultSet r = db.read(sql);
             while (r.next()) {
@@ -61,6 +61,7 @@ public class GetFromDBaraa {
         return services;
 
     }
+    
 
     public static ArrayList<DepartmentPaths> departmentPath(int idservice) {
         ArrayList<DepartmentPaths> departments = new ArrayList<>();
@@ -161,8 +162,8 @@ public class GetFromDBaraa {
             System.out.println(sql);
             ResultSet r = db.read(sql);
             while (r.next()) {
-                s = new DepartmentPaths(r.getInt(1), r.getString(16), r.getInt(2), r.getString(15));
-                d = new DecisionsDepartment(r.getString(8), r.getString(9), r.getString(6), r.getDouble(7), r.getInt(1), r.getInt(2), r.getString(15), r.getString(11));
+                s = new DepartmentPaths(r.getInt(1), r.getString(17), r.getInt(2), r.getString(16));
+                d = new DecisionsDepartment(r.getString(8), r.getString(9), r.getString(6), r.getDouble(7), r.getInt(1), r.getInt(2), r.getString(16), r.getString(11),r.getString(12));
                 sd = new StepsAndDecsions(s, d);
                 deps.add(sd);
             }
@@ -393,5 +394,26 @@ public class GetFromDBaraa {
         } catch (Exception e) {
         }
         return services;
+    }
+    
+    public static MunicipalityInformation getHomePageDetails() {
+
+    MunicipalityInformation municipalityInformation = new MunicipalityInformation();
+        try {
+            DB db = new DB();
+            String sql = "SELECT telephone, fax, email, munName, munCity, munQuarter, munStreet FROM oss.homepage_data;";
+            ResultSet r = db.read(sql);
+
+            while (r.next()) {
+                municipalityInformation = new MunicipalityInformation(r.getString(1), r.getString(2), r.getString(3), r.getString(4), r.getString(5), r.getString(6), r.getString(7));
+
+            }
+
+        } catch (SQLException | ClassNotFoundException ex) {
+            Logger.getLogger(GetDB_Eman.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+        return municipalityInformation;
+
     }
 }

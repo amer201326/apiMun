@@ -245,6 +245,43 @@ public class GetFromDB {
         return servicesCount;
 
     }
+    
+    
+    
+    public static List<ServiceCount> getMore3ServiceRequest() {
+        List<ServiceCount> servicesCount = new ArrayList<ServiceCount>();
+        int i = 0;
+        double sum = 1;
+        try {
+
+            DB db = new DB();
+            String sql1 = " select count(*) from service_citizen;";
+            ResultSet r1 = db.read(sql1);
+            while (r1.next()) {
+                sum = r1.getInt(1);
+
+            }
+            System.out.println("aaaaaaaaa" + sum);
+
+            String sql = "SELECT sc.Services_Provided_ID, COUNT(*) as l ,sp.Serv_Name AS freq FROM service_citizen as sc \n" +
+"                      inner join services_provided as sp on sp.Services_Provided_ID = sc.Services_Provided_ID \n" +
+"                     GROUP BY Services_Provided_ID order by l DESC LIMIT 3;";
+
+            ResultSet r = db.read(sql);
+
+            while (r.next()) {
+                servicesCount.add(new ServiceCount(r.getString(3), (int) ((r.getInt(2) / sum) * 100)));
+
+                i++;
+
+            }
+
+        } catch (SQLException | ClassNotFoundException ex) {
+            Logger.getLogger(GetFromDB.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return servicesCount;
+
+    }
 
     public static List<JobTitel> getJobTittle(String id) {
         JobTitel d = new JobTitel();
@@ -425,7 +462,17 @@ public class GetFromDB {
                 s = new Service(r.getInt(1), r.getString(2), r.getDouble(3), r.getInt(4), r.getString(5),
                         new Department(r.getInt(6), r.getString(7), r.getString(8)),
                         new Section(r.getInt(9), r.getInt(10), r.getString(11), r.getString(7)), r.getString(12));
+  
+                List<ServiceAttachmentName> allAttachment = getAttavhmentByserviceById(s.id);
+                for (ServiceAttachmentName serviceAttachmentName : allAttachment) {
 
+                    if (serviceAttachmentName.nameFile == null) {
+                        s.attachment.add(serviceAttachmentName);
+                    } else {
+                        s.attwhithFile.add(serviceAttachmentName);
+                    }
+
+                }
                 services.add(s);
             }
 
@@ -433,7 +480,6 @@ public class GetFromDB {
         }
         return services;
     }
-
     public static int getMaxIDEmployee() {
         int id = 0;
         try {
@@ -469,6 +515,30 @@ public class GetFromDB {
         }
         return d;
     }
+    
+    
+    
+    public static Employee getNameOfDepartmentManagerById(String param) {
+        Employee d = new Employee();
+
+        try {
+            DB db = new DB();
+            String sql = "SELECT em.Emp_Name FROM oss.employees as em where Dep_ID =" + param + " and type='h';";
+
+            ResultSet r = db.read(sql);
+            while (r.next()) {
+                d = new Employee(r.getString(1));
+                System.out.println(d + "..............................");
+
+            }
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
+        return d;
+    }
+    
+    
+    
 
     public static List<Employee> GetEmployeeinDepartment(String param) {
         List<Employee> emp = new ArrayList<Employee>();
@@ -493,11 +563,22 @@ public class GetFromDB {
         try {
             DB db = new DB();
 
-            String sql = "SELECT * FROM oss.employees where Emp_ID =" + param + ";";
+            String sql = " SELECT e.Dep_ID, e.Sec_ID, e.Job_ID, e.Emp_ID, e.Emp_Name, e.Emp_ID_Card, e.Emp_Email, "
+                    + "e.Emp_Telephone, e.Emp_Birthday, e.Emp_StartDate, e.Emp_EndDate, e.Emp_Mobile, e.Emp_Gender, "
+                    + "e.type, d.Dep_Name, s.Sec_Name, j.Job_name, ac.UserName, ac.Password FROM oss.employees as e "
+                    + "left join department as d on  e.Dep_ID = d.Dep_ID left join section as s on e.Sec_ID = s.Sec_ID "
+                    + " left join jobtitle as j on e.Job_ID = j.Job_ID left join employeeaccount as ac on "
+                    + "ac.Emp_ID = e.Emp_ID  where e.Emp_ID =" + param + ";";
             System.out.println(sql);
             ResultSet r = db.read(sql);
             while (r.next()) {
-                emp = new Employee(r.getInt(1), r.getInt(2), r.getInt(3), r.getInt(4), r.getString(5), r.getString(6), r.getString(7), r.getString(8), r.getString(9), r.getString(10), r.getString(11), r.getString(12), r.getString(13));
+                emp = new Employee(r.getInt(1), r.getInt(2), r.getInt(3), r.getInt(4), 
+                        r.getString(5), r.getString(6), r.getString(7), r.getString(8), 
+                        r.getString(9), r.getString(10), r.getString(11), r.getString(12), 
+                        r.getString(13), r.getString(14), r.getString(15), r.getString(16), r.getString(17));
+                emp.setAccount(new EmployeeAccount(r.getString(18), r.getString(19)));
+                
+                System.out.println(emp + "\n\n\n\n 11111111111111111111111111111111111111");
 
             }
         } catch (Exception e) {
@@ -505,6 +586,11 @@ public class GetFromDB {
         }
         return emp;
 
+        
+        
+
+        
+        
     }
 
     public static List<Integer> getAttavhmentForserviceById(String id) {
@@ -637,7 +723,7 @@ public class GetFromDB {
             System.out.println(sql);
             ResultSet r = db.read(sql);
             while (r.next()) {
-                a = new ServiceAttachmentName(r.getInt(1), r.getString(2), r.getString(4), r.getBinaryStream(3), r.getString(5), r.getString(6), "");
+                a = new ServiceAttachmentName(r.getInt(1), r.getString(2), r.getString(4), null, r.getString(5), r.getString(6), "");
                 System.out.println(a + "   " + r.getString(6));
                 name.add(a);
             }
@@ -808,7 +894,7 @@ public class GetFromDB {
             System.out.println(sql);
             ResultSet r = db.read(sql);
             while (r.next()) {
-                s = new AttachmentArchiveCitizen(r.getInt(1), r.getInt(2), r.getInt(3), r.getBinaryStream(4), r.getString(5), r.getString(6));
+                s = new AttachmentArchiveCitizen(r.getInt(1), r.getInt(2), r.getInt(3), r.getBinaryStream(4), r.getString(5), r.getString(6), r.getString(7));
 
                 at.add(s);
             }
@@ -832,7 +918,7 @@ public class GetFromDB {
             System.out.println(sql);
             ResultSet r = db.read(sql);
             while (r.next()) {
-                s = new AttachmentArchiveCitizen(r.getInt(1), r.getInt(2), r.getInt(3), r.getBinaryStream(4), r.getString(5), r.getString(7));
+                s = new AttachmentArchiveCitizen(r.getInt(1), r.getInt(2), r.getInt(3), r.getBinaryStream(4), r.getString(5), r.getString(6), r.getString(7));
                 if (s.fileDownload != null) {
                     at.add(s);
                 }
@@ -849,7 +935,7 @@ public class GetFromDB {
     public static Employee getEmployeeAccount(String username, String passWord) {
         Employee em;
         passWord = Crypto.encPas(k, passWord);
-        String q = "SELECT * FROM employees as e inner join employeeaccount as ea on e.Emp_ID= ea.Emp_ID  where ea.UserName =  '" + username + "' and ea.Password = '" + passWord + "';";
+        String q = "SELECT * FROM employees as e inner join employeeaccount as ea on e.Emp_ID= ea.Emp_ID  left join jobtitle as jt on jt.Job_ID = e.Job_ID  where ea.UserName =  '" + username + "' and ea.Password = '" + passWord + "';";
         try {
             DB db = new DB();
 
@@ -859,6 +945,7 @@ public class GetFromDB {
                 em = new Employee(r.getInt(1), r.getInt(2), r.getInt(3), r.getInt(4), r.getString(5), r.getString(6), r.getString(7), r.getString(8), r.getString(9), r.getString(10), r.getString(11), r.getString(12), r.getString(13));
                 em.account = new EmployeeAccount(r.getString(16), r.getString(17));
                 em.setType(r.getString(14));
+                em.job_name = r.getString(19);
                 return em;
             }
 
@@ -879,7 +966,7 @@ public class GetFromDB {
             System.out.println(sql);
             ResultSet r = db.read(sql);
             while (r.next()) {
-                dds.add(new DecisionsDepartment(r.getInt(1), r.getInt(2), r.getInt(3), r.getInt(4), r.getInt(5), r.getString(6), r.getDouble(7), r.getString(8), r.getString(9), r.getString(10)));
+                dds.add(new DecisionsDepartment(r.getInt(1), r.getInt(2), r.getInt(3), r.getInt(4), r.getInt(5), r.getString(6), r.getDouble(7), r.getString(8), r.getString(9), r.getString(10), r.getString(12)));
             }
         } catch (SQLException ex) {
             Logger.getLogger(GetFromDB.class.getName()).log(Level.SEVERE, null, ex);
@@ -919,7 +1006,7 @@ public class GetFromDB {
             System.out.println(sql);
             ResultSet r = db.read(sql);
             while (r.next()) {
-                djs.add(new DecisionsJob(new JobPath(r.getInt(1), r.getInt(2), r.getInt(3), r.getInt(4), null, r.getInt(5), r.getInt(6), r.getInt(7),null), r.getInt(10),
+                djs.add(new DecisionsJob(new JobPath(r.getInt(1), r.getInt(2), r.getInt(3), r.getInt(4), null, r.getInt(5), r.getInt(6), r.getInt(7), null), r.getInt(10),
                         r.getString(11), r.getString(12), r.getDouble(13), r.getString(14), r.getString(15), r.getString(16)));
             }
         } catch (SQLException ex) {
@@ -955,13 +1042,13 @@ public class GetFromDB {
         if (emp.checkTypeHed()) {
             try {
                 DB db = new DB();
-                
+
                 String sql = "SELECT * FROM services_provided as sp "
                         + "inner join service_citizen as sc on sc.Services_Provided_ID = sp.Services_Provided_ID  "
                         + "inner join citizen as cit on sc.Cit_ID = cit.Cit_ID "
                         + "inner join decisions_department as dd on sc.Service_Citizen_ID = dd.Service_Citizen_ID and sc.Cit_ID = dd.Cit_ID "
                         + " and sc.Services_Provided_ID = dd.Services_Provided_ID inner join department as d on dd.Dep_ID = d.Dep_ID "
-                        + " where dd.Dep_ID = " + emp.dep_id + ";";
+                        + " where dd.Dep_ID = " + emp.dep_id + " order by sc.date DESC;";
                 System.out.println(sql);
                 ResultSet r = db.read(sql);
                 while (r.next()) {
@@ -969,15 +1056,18 @@ public class GetFromDB {
                     Citizen c1 = new Citizen(r.getInt(15), r.getString(16), r.getString(17), r.getString(18), r.getString(19), r.getString(20), r.getInt(21),
                             r.getString(22), r.getString(23), r.getString(24), r.getString(25), r.getString(26), r.getString(27), r.getString(28), r.getString(29), r.getString(30),
                             r.getString(31), r.getString(32), r.getString(33), r.getString(34), r.getString(35));
-                    DecisionsDepartment dd = new DecisionsDepartment(r.getInt(36), r.getInt(37), r.getInt(38), r.getInt(39), r.getInt(40), r.getString(41), r.getInt(42), r.getString(43), r.getString(44), r.getString(45));
-                    System.out.println("dip dis = >> "+dd);
+                    DecisionsDepartment dd = new DecisionsDepartment(r.getInt(36), r.getInt(37), r.getInt(38), r.getInt(39), r.getInt(40), r.getString(41), r.getInt(42), r.getString(43), r.getString(44), r.getString(45), r.getString(47));
+                    System.out.println("dip dis = >> " + dd);
                     cit = new ServiceCitizen(s, r.getInt(9), r.getInt(10), r.getInt(11), r.getString(12), r.getString(13), r.getString(14), c1);
                     cit.decisionsDepartment = dd;
-                   
-                   Department d = new Department(r.getString(48));
-                   d.setId(r.getInt(47));
-                   cit.setDepartment(d);
-                    
+
+                    Department d = new Department(r.getString(50));
+                    d.setId(r.getInt(49));
+                    d.setImage(r.getString(51));
+                    System.out.println(d);
+                    s.department = d;
+                    cit.setDepartment(d);
+
 //               cit.decisionsJob.internalMessage = r.getString(59);
 //               cit.decisionsJob.externalMessage = r.getString(60);
                     c.add(cit);
@@ -992,7 +1082,7 @@ public class GetFromDB {
                 DB db = new DB();
                 String sql = "SELECT * FROM services_provided as sp inner join service_citizen as sc on sc.Services_Provided_ID = sp.Services_Provided_ID "
                         + " inner join citizen as cit on sc.Cit_ID = cit.Cit_ID inner join service_jobs as sj  on sc.Service_Citizen_ID = sj.Service_Citizen_ID and  sc.Cit_ID = sj.Cit_ID  "
-                        + " inner join department as d on sp.DepartmentID = d.Dep_ID where sj.Job_ID = " + emp.job_id + " and  sj.Sec_ID = " + emp.sec_id + " and sj.Dep_ID = " + emp.dep_id + ";";
+                        + " inner join department as d on sp.DepartmentID = d.Dep_ID where sj.Job_ID = " + emp.job_id + " and  sj.Sec_ID = " + emp.sec_id + " and sj.Dep_ID = " + emp.dep_id + " order by date DESC;";
                 System.out.println(sql);
                 ResultSet r = db.read(sql);
                 while (r.next()) {
@@ -1000,14 +1090,17 @@ public class GetFromDB {
                     Citizen c1 = new Citizen(r.getInt(15), r.getString(16), r.getString(17), r.getString(18), r.getString(19), r.getString(20), r.getInt(21),
                             r.getString(22), r.getString(23), r.getString(24), r.getString(25), r.getString(26), r.getString(27), r.getString(28), r.getString(29), r.getString(30),
                             r.getString(31), r.getString(32), r.getString(33), r.getString(34), r.getString(35));
-                    Service_Job service_Job = new Service_Job(r.getInt(36), r.getInt(37), r.getInt(38), r.getInt(39), r.getInt(40), r.getInt(41), r.getInt(42), r.getInt(43), r.getInt(44), r.getString(45));
+                    Service_Job service_Job = new Service_Job(r.getInt(36), r.getInt(37), r.getInt(38), r.getInt(39), r.getInt(40), r.getInt(41), r.getInt(42), r.getInt(43), r.getInt(44), r.getString(45), r.getString(46));
+
                     cit = new ServiceCitizen(s, r.getInt(9), r.getInt(10), r.getInt(11), r.getString(12), r.getString(13), r.getString(14), c1, service_Job);
 //               cit.decisionsJob.internalMessage = r.getString(59);
 //               cit.decisionsJob.externalMessage = r.getString(60);
 
-                   Department d = new Department(r.getString(47));
-                   d.setId(r.getInt(46));
-                   cit.setDepartment(d);
+                    Department d = new Department(r.getString(48));
+                    d.setId(r.getInt(47));
+                    d.setImage(r.getString(49));
+                    s.department = d;
+                    cit.setDepartment(d);
 
                     c.add(cit);
                 }
@@ -1022,36 +1115,37 @@ public class GetFromDB {
         return c;
     }
 
-    public static List<ServiceCitizen> getAllRequestService(){
-         ServiceCitizen cit = new ServiceCitizen();
+    public static List<ServiceCitizen> getAllRequestService() {
+        ServiceCitizen cit = new ServiceCitizen();
         List<ServiceCitizen> c = new ArrayList<ServiceCitizen>();
-         try {
-                DB db = new DB();
-                String sql = "SELECT * FROM services_provided as sp inner join service_citizen as sc on sc.Services_Provided_ID = sp.Services_Provided_ID inner join citizen as cit on sc.Cit_ID = cit.Cit_ID inner join department as d on sp.DepartmentID = d.Dep_ID;";
-                        
-                System.out.println(sql);
-                ResultSet r = db.read(sql);
-                while (r.next()) {
-                    
-                    Service s = new Service(r.getInt(1), r.getString(2), r.getDouble(3), r.getInt(4), r.getString(5), r.getString(8));
-                    
-                    Citizen c1 = new Citizen(r.getInt(15), r.getString(16), r.getString(17), r.getString(18), r.getString(19), r.getString(20), r.getInt(21),
-                            r.getString(22), r.getString(23), r.getString(24), r.getString(25), r.getString(26), r.getString(27), r.getString(28), r.getString(29), r.getString(30),
-                            r.getString(31), r.getString(32), r.getString(33), r.getString(34), r.getString(35));
+        try {
+            DB db = new DB();
+            String sql = "SELECT * FROM services_provided as sp inner join service_citizen as sc on sc.Services_Provided_ID = sp.Services_Provided_ID inner join citizen as cit on sc.Cit_ID = cit.Cit_ID inner join department as d on sp.DepartmentID = d.Dep_ID;";
 
-                    cit = new ServiceCitizen(s, r.getInt(9), r.getInt(10), r.getInt(11), r.getString(12), r.getString(13), r.getString(14), c1);
-                    Department d = new Department(r.getString(37));
-                    d.setId(r.getInt(36));
-                    cit.setDepartment(d);
-                    c.add(cit);
-                }
-            } catch (SQLException ex) {
-                Logger.getLogger(GetFromDB.class.getName()).log(Level.SEVERE, null, ex);
-            } catch (ClassNotFoundException ex) {
-                Logger.getLogger(GetFromDB.class.getName()).log(Level.SEVERE, null, ex);
+            System.out.println(sql);
+            ResultSet r = db.read(sql);
+            while (r.next()) {
+
+                Service s = new Service(r.getInt(1), r.getString(2), r.getDouble(3), r.getInt(4), r.getString(5), r.getString(8));
+
+                Citizen c1 = new Citizen(r.getInt(15), r.getString(16), r.getString(17), r.getString(18), r.getString(19), r.getString(20), r.getInt(21),
+                        r.getString(22), r.getString(23), r.getString(24), r.getString(25), r.getString(26), r.getString(27), r.getString(28), r.getString(29), r.getString(30),
+                        r.getString(31), r.getString(32), r.getString(33), r.getString(34), r.getString(35));
+
+                cit = new ServiceCitizen(s, r.getInt(9), r.getInt(10), r.getInt(11), r.getString(12), r.getString(13), r.getString(14), c1);
+                Department d = new Department(r.getString(37));
+                d.setId(r.getInt(36));
+                cit.setDepartment(d);
+                c.add(cit);
             }
-              return c;
+        } catch (SQLException ex) {
+            Logger.getLogger(GetFromDB.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (ClassNotFoundException ex) {
+            Logger.getLogger(GetFromDB.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return c;
     }
+
     public static List<ServiceAttachmentName> getAttachmentByserviceCitizen(int idServise, int idCitizen, int idSC) {
         List<ServiceAttachmentName> name = new ArrayList<>();
         try {
@@ -1105,7 +1199,7 @@ public class GetFromDB {
 
             ResultSet r = db.read(sql);
             while (r.next()) {
-                d = new Service_Job(r.getInt(1), r.getInt(2), r.getInt(3), r.getInt(4), r.getInt(5), r.getInt(6), r.getInt(7), r.getInt(8), r.getInt(9), r.getString(10));
+                d = new Service_Job(r.getInt(1), r.getInt(2), r.getInt(3), r.getInt(4), r.getInt(5), r.getInt(6), r.getInt(7), r.getInt(8), r.getInt(9), r.getString(10), r.getString(11));
                 job.add(d);
             }
         } catch (Exception e) {
@@ -1122,7 +1216,7 @@ public class GetFromDB {
             System.out.println(sql);
             ResultSet r = db.read(sql);
             while (r.next()) {
-                dds.add(new DecisionsDepartment(r.getInt(1), r.getInt(2), r.getInt(3), r.getInt(4), r.getInt(5), r.getString(6), r.getDouble(7), r.getString(8), r.getString(9), r.getString(10)));
+                dds.add(new DecisionsDepartment(r.getInt(1), r.getInt(2), r.getInt(3), r.getInt(4), r.getInt(5), r.getString(6), r.getDouble(7), r.getString(8), r.getString(9), r.getString(10), r.getString(12)));
             }
         } catch (SQLException ex) {
             Logger.getLogger(GetFromDB.class.getName()).log(Level.SEVERE, null, ex);
@@ -1141,7 +1235,7 @@ public class GetFromDB {
             System.out.println(sql);
             ResultSet r = db.read(sql);
             while (r.next()) {
-                dds.add(new DecisionsDepartment(r.getInt(1), r.getInt(2), r.getInt(3), r.getInt(4), r.getInt(5), r.getString(6), r.getDouble(7), r.getString(8), r.getString(9), r.getString(10)));
+                dds.add(new DecisionsDepartment(r.getInt(1), r.getInt(2), r.getInt(3), r.getInt(4), r.getInt(5), r.getString(6), r.getDouble(7), r.getString(8), r.getString(9), r.getString(10), r.getString(12)));
             }
         } catch (SQLException ex) {
             Logger.getLogger(GetFromDB.class.getName()).log(Level.SEVERE, null, ex);
@@ -1200,7 +1294,7 @@ public class GetFromDB {
             System.out.println(sql);
             ResultSet r = db.read(sql);
             while (r.next()) {
-                djs.add(new DecisionsJob(new JobPath(r.getInt(1), r.getInt(2), r.getInt(3), r.getInt(4), null, r.getInt(5), r.getInt(6), r.getInt(7),null), r.getInt(10),
+                djs.add(new DecisionsJob(new JobPath(r.getInt(1), r.getInt(2), r.getInt(3), r.getInt(4), null, r.getInt(5), r.getInt(6), r.getInt(7), null), r.getInt(10),
                         r.getString(11), r.getString(12), r.getDouble(13), r.getString(14), r.getString(15), r.getString(16)));
             }
         } catch (SQLException ex) {
@@ -1282,7 +1376,7 @@ public class GetFromDB {
             System.out.println(sql);
             ResultSet r = db.read(sql);
             while (r.next()) {
-                djs.add(new DecisionsJob(new JobPath(r.getInt(1), r.getInt(2), r.getInt(3), r.getInt(4), null, r.getInt(5), r.getInt(6), r.getInt(7),null), r.getInt(10),
+                djs.add(new DecisionsJob(new JobPath(r.getInt(1), r.getInt(2), r.getInt(3), r.getInt(4), null, r.getInt(5), r.getInt(6), r.getInt(7), null), r.getInt(10),
                         r.getString(11), r.getString(12), r.getDouble(13), r.getString(14), r.getString(15), r.getString(16), r.getInt(4), r.getInt(8), r.getInt(9)));
             }
         } catch (SQLException ex) {
@@ -1338,6 +1432,7 @@ public class GetFromDB {
 
         return attach;
     }
+
     public static List<AttachmentServiceEmployee> getAttachmentServiceEmployee(int Cit_ID, int Service_Citizen_ID, int Services_Provided_ID) {
         List<AttachmentServiceEmployee> attach = new ArrayList<>();
         try {
@@ -1350,7 +1445,7 @@ public class GetFromDB {
             ResultSet r = db.read(sql);
             while (r.next()) {
 
-                AttachmentServiceEmployee att = new AttachmentServiceEmployee(r.getInt(1), r.getInt(2), Cit_ID, Service_Citizen_ID, Services_Provided_ID, r.getBinaryStream(6), r.getString(7),r.getInt(8));
+                AttachmentServiceEmployee att = new AttachmentServiceEmployee(r.getInt(1), r.getInt(2), Cit_ID, Service_Citizen_ID, Services_Provided_ID, r.getBinaryStream(6), r.getString(7), r.getInt(8));
                 attach.add(att);
 
             }
@@ -1385,4 +1480,132 @@ public class GetFromDB {
         }
         return false;
     }
+
+    public static List<ServiceCitizen> serviceNotificationCitizen(Citizen citizen) {
+        ArrayList<ServiceCitizen> services = new ArrayList<>();
+        try {
+            DB db = new DB();
+            ServiceCitizen sc;
+            Service s;
+
+            String sql = "SELECT *  FROM service_citizen as sc inner join services_provided as sp on  sc.Services_Provided_ID=sp.Services_Provided_ID "
+                    + "inner join notificationuser as nn on sc.Service_Citizen_ID = nn.Service_Citizen_ID and sc.Cit_ID = nn.Cit_ID "
+                    + " inner join department as d on sp.DepartmentID = d.Dep_ID where  sc.Cit_ID=" + citizen.id + " and nn.show = 'yes' order by nn.date DESC;";
+
+            System.out.println(sql);
+            ResultSet r = db.read(sql);
+            while (r.next()) {
+                sc = new ServiceCitizen(r.getInt(1), r.getInt(2), r.getInt(3), r.getString(4), r.getString(5), r.getString(6));
+                sc.service = new Service(r.getInt(7), r.getString(8), r.getInt(9), r.getInt(10), r.getString(11), new Department(r.getInt(12)), new Section(r.getString(13)), r.getString(14));
+                sc.notificationUser = new NotificationUser(r.getInt(15), r.getInt(16), r.getString(17), r.getString(18), r.getString(19), r.getString(20), r.getString(21));
+                sc.department = new Department(r.getInt(22), r.getString(23), r.getString(24));
+                services.add(sc);
+            }
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
+        return services;
+    }
+
+    public static List<StepsAndDecsions> StepsAndDesion(int idcitizen, int idSerCit, int idService) {
+    	//List<AttachmentServiceEmployee> attachmentServiceEmployee = GetFromDBaraa.AttachmentServiceEmployee(idcitizen, idSerCit, idService);;
+        List<StepsAndDecsions> pathD = GetFromDBaraa.stepAndDecDep(idcitizen, idSerCit);
+        List<DecisionSection> pathS = GetFromDBaraa.sectionsteps(idService);
+        List<StepsAndDecsionsJob> pathJ = GetFromDBaraa.stepAndDecJop(idcitizen, idSerCit);
+
+        System.out.println("lllll" + pathD.size());
+        for (StepsAndDecsions d : pathD) {
+            d.decisionsDepartment.setTotalDepCost(d.decisionsDepartment.getTotalDepCost() + d.decisionsDepartment.getCost());
+
+            for (DecisionSection s : pathS) {
+                if (d.getDepartmentPaths().id == s.getSection().getDepartmentId() && d.getDepartmentPaths().order == s.getSection().getOrderDepartment()) {
+                    d.getSections().add(s);
+                    for (StepsAndDecsionsJob j : pathJ) {
+                        if (s.getSection().getId() == j.getJobPath().getSectionID() && s.getSection().getOrder() == j.getJobPath().getsOrder()) {
+                            s.getJob().add(j);
+                            d.decisionsDepartment.setTotalDepCost(d.decisionsDepartment.getTotalDepCost() + j.decisionsJob.getCost());
+
+//                            for (AttachmentServiceEmployee att : attachmentServiceEmployee) {
+//                                if (att.getEmp_ID() == j.decisionsJob.getIdEmployee()) {
+//                                    //j.setAttachmentServiceEmployee(att);
+//                                    j.getAttachmentServiceEmployee().add(att);
+//
+//                                }
+//                            }
+
+                        }
+                    }
+                }
+            }
+            //totalCost = totalCost + d.decisionsDepartment.getTotalDepCost();
+        }
+        return pathD;
+    }
+    public static ServiceAttachmentName getAttachmentService(int id) {
+        
+    	ServiceAttachmentName attach = new ServiceAttachmentName();
+    	
+        try {
+            DB db = new DB();
+            String sql = "    SELECT * FROM serviceattachmentname where ServiceAttachmentName_ID ="+id+";";
+            System.out.println(sql);
+            ResultSet r = db.read(sql);
+            while (r.next()) {
+            	attach = new ServiceAttachmentName(r.getInt(1), r.getString(2), r.getString(4), r.getBinaryStream(3), r.getString(5), r.getString(6),"");
+            }
+
+        } catch (SQLException | ClassNotFoundException ex) {
+            Logger.getLogger(GetFromDB.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+        return attach;
+    }
+
+    public static int getMaxId_service_citizen(int cid) {
+        int id = 0;
+        try {
+            DB db = new DB();
+
+            String sql = "SELECT MAX(Service_Citizen_ID) FROM service_citizen where Cit_ID = " + cid + ";";
+
+            System.out.println(sql);
+            ResultSet r = db.read(sql);
+            while (r.next()) {
+                id = r.getInt(1);
+                System.out.println(id);
+            }
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
+        return id;
+    }
+    public static AttachmentArchiveCitizen getAttachmentCitizen(int id) {
+        
+    	AttachmentArchiveCitizen attach = null;
+    	
+        try {
+            DB db = new DB();
+            String sql = "SELECT * FROM attachment_archive_citizen where Atta_ArchiveC_ID ="+id+";";
+            System.out.println(sql);
+            ResultSet r = db.read(sql);
+            while (r.next()) {
+            	attach = new AttachmentArchiveCitizen(r.getInt(1),  r.getInt(2),  r.getInt(3),  r.getBinaryStream(4), r.getString(5),  r.getString(6));
+            }
+
+        } catch (SQLException | ClassNotFoundException ex) {
+            Logger.getLogger(GetFromDB.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+        return attach;
+    }
+
+	public static void addNewServiceCitizen(int idMax, int idSer, int idCit, String note) {
+		// TODO Auto-generated method stub
+		ServiceCitizen serviceCitizen = new ServiceCitizen(idMax, idSer, idCit, note);
+		serviceCitizen.addToDataBase();
+		
+		
+	}
+    
+    
 }

@@ -51,6 +51,41 @@ public class Employee implements Serializable {
     public Employee() {
     }
 
+    public Employee(String emp_name) {
+        this.emp_name = emp_name;
+    }
+
+    
+    
+    public Employee(int dep_id, int sec_id, int job_id, int emp_id, String emp_name, 
+            String emp_idCard, String emp_email, String emp_tel, String emp_birth, 
+            String emp_StartDate, String emp_EndDate, String emp_mobile, String emp_gender, String type,
+            String dep_name, String sec_name, String job_name) {
+        this.dep_id = dep_id;
+        this.sec_id = sec_id;
+        this.job_id = job_id;
+        this.emp_id = emp_id;
+        
+        this.emp_name = emp_name;
+        this.emp_idCard = emp_idCard;
+        this.emp_email = emp_email;
+        this.emp_tel = emp_tel;
+        
+        
+        this.emp_birth = emp_birth;
+        this.emp_StartDate = emp_StartDate;
+        this.emp_EndDate = emp_EndDate;
+        this.emp_mobile = emp_mobile;
+        
+        this.emp_gender = emp_gender;
+        this.type = type;
+        this.dep_name = dep_name;
+        this.sec_name = sec_name;
+        this.job_name = job_name;
+       
+    }
+    
+
     public Employee(int dep_id, int sec_id, int job_id, int emp_id, String emp_name, String emp_idCard, String emp_email, String emp_tel, String emp_birth, String emp_StartDate, String emp_EndDate, String emp_mobile, String emp_gender) {
         this.dep_id = dep_id;
         this.sec_id = sec_id;
@@ -287,21 +322,27 @@ public class Employee implements Serializable {
     public String updateEmployee() {
         String q = "UPDATE oss.employees SET Emp_Name = '" + emp_name + "',Emp_ID_Card = '" + emp_idCard
                 + "', Emp_Email = '" + emp_email + "',Emp_Telephone = '" + emp_tel
-                + "', Emp_Birthday = '" + emp_birth + "',Emp_StartDate = '" + emp_StartDate
-                + "', Emp_EndDate = '" + emp_EndDate + "',Emp_Mobile = '" + emp_mobile + "', Emp_Gender = '"
-                + emp_gender + "' WHERE (Emp_ID = " + emp_id + ");";
+                + "' ,Emp_Mobile = '" + emp_mobile + "' WHERE (Emp_ID = " + emp_id + ");";
         try {
             DB data = new DB();
-
+            System.out.println(q);
             data.write(q);
 
         } catch (Exception ex) {
-            Logger.getLogger(Citizen.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(Employee.class.getName()).log(Level.SEVERE, null, ex);
             return "يوجد مشكلة في  بيانات المستخدم";
         }
         return account.updateEmp();
 
     }
+    
+    
+    public String updateEmployeePassword() {
+        
+        return account.updateEmp();
+
+    }
+    
 
     public String getDep_name() {
         return dep_name;

@@ -22,7 +22,6 @@ import java.util.Arrays;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.crypto.Cipher;
-
 import org.primefaces.PrimeFaces;
 import org.primefaces.component.fileupload.FileUpload;
 import org.primefaces.event.FileUploadEvent;
@@ -38,13 +37,15 @@ import org.primefaces.model.UploadedFile;
  */
 public class ServiceAttachmentName implements Serializable {
 
+	public InputStream inputForData;
+	
     int id;
     String name;
     String notes;
-    UploadedFile file;
+    //UploadedFile file;
 
     String nameFile;
-    StreamedContent fileDownload;
+    //StreamedContent fileDownload;
     String haveFile;
     String form;
     boolean formArchevCitizen;
@@ -72,10 +73,10 @@ public class ServiceAttachmentName implements Serializable {
                 System.out.println(id);
                 byte[] inputByte = new byte[inputStream.available()];
                 inputStream.read(inputByte);
-                outputfinal = Crypto.dec(Cipher.DECRYPT_MODE, "foreanderDowntop", inputByte);
-                InputStream inputForData = new ByteArrayInputStream(outputfinal);
-                System.out.println(nameFile);
-                fileDownload = new DefaultStreamedContent(inputForData, "file", nameFile);
+                byte[] outputfinal = Crypto.dec(Cipher.DECRYPT_MODE, "foreanderDowntop", inputByte);
+                this.inputForData = new ByteArrayInputStream(outputfinal);
+                //System.out.println(nameFile);
+                //fileDownload = new DefaultStreamedContent(inputForData, "file", nameFile);
 
             } else {
                 System.out.println(name);
@@ -117,13 +118,13 @@ public class ServiceAttachmentName implements Serializable {
         this.notes = notes;
     }
 
-    public StreamedContent getFileDownload() {
-        return fileDownload;
-    }
-
-    public void setFileDownload(StreamedContent fileDownload) {
-        this.fileDownload = fileDownload;
-    }
+//    public StreamedContent getFileDownload() {
+//        return fileDownload;
+//    }
+//
+//    public void setFileDownload(StreamedContent fileDownload) {
+//        this.fileDownload = fileDownload;
+//    }
 
     public void update() {
         String q = "UPDATE serviceattachmentname SET ServA_Name = '" + name + "',notes = '" + notes + "',`haveFile` = '" + haveFile + "' WHERE (ServiceAttachmentName_ID = " + id + ");";
@@ -140,47 +141,47 @@ public class ServiceAttachmentName implements Serializable {
 
     }
 
-    public void updatewithFile() {
-
-        if (file.getSize() != 0) {
-            String q = "UPDATE `oss`.`serviceattachmentname` SET `ServA_Name` = ?,`File` = ?,`notes` = ?,`typeFile` = ?,`haveFile` = ? WHERE `ServiceAttachmentName_ID` = " + id + " ;";
-
-            System.out.println(q);
-            try {
-                DB data = new DB();
-                PreparedStatement p = data.prepareStatement(q);
-                p.setString(1, name);
-                p.setBinaryStream(2, saveFileInDisk());
-                p.setString(3, notes);
-                p.setString(4, nameFile);
-                p.setString(5, haveFile);
-                p.executeUpdate();
-            } catch (SQLException ex) {
-                Logger.getLogger(ServiceAttachmentName.class.getName()).log(Level.SEVERE, null, ex);
-            } catch (ClassNotFoundException ex) {
-                Logger.getLogger(ServiceAttachmentName.class.getName()).log(Level.SEVERE, null, ex);
-            }
-        } else {
-            String q = "UPDATE `oss`.`serviceattachmentname` SET `ServA_Name` = ?,`notes` = ?,`typeFile` = ?,`haveFile` = ? WHERE `ServiceAttachmentName_ID` = " + id + " ;";
-
-            System.out.println(q);
-            try {
-                DB data = new DB();
-                PreparedStatement p = data.prepareStatement(q);
-                p.setString(1, name);
-                //p.setBinaryStream(1, saveFileInDisk());
-                p.setString(2, notes);
-                p.setString(3, nameFile);
-                p.setString(4, haveFile);
-                p.executeUpdate();
-            } catch (SQLException ex) {
-                Logger.getLogger(ServiceAttachmentName.class.getName()).log(Level.SEVERE, null, ex);
-            } catch (ClassNotFoundException ex) {
-                Logger.getLogger(ServiceAttachmentName.class.getName()).log(Level.SEVERE, null, ex);
-            }
-        }
-
-    }
+//    public void updatewithFile() {
+//
+//        if (file.getSize() != 0) {
+//            String q = "UPDATE `oss`.`serviceattachmentname` SET `ServA_Name` = ?,`File` = ?,`notes` = ?,`typeFile` = ?,`haveFile` = ? WHERE `ServiceAttachmentName_ID` = " + id + " ;";
+//
+//            System.out.println(q);
+//            try {
+//                DB data = new DB();
+//                PreparedStatement p = data.prepareStatement(q);
+//                p.setString(1, name);
+//                p.setBinaryStream(2, saveFileInDisk());
+//                p.setString(3, notes);
+//                p.setString(4, nameFile);
+//                p.setString(5, haveFile);
+//                p.executeUpdate();
+//            } catch (SQLException ex) {
+//                Logger.getLogger(ServiceAttachmentName.class.getName()).log(Level.SEVERE, null, ex);
+//            } catch (ClassNotFoundException ex) {
+//                Logger.getLogger(ServiceAttachmentName.class.getName()).log(Level.SEVERE, null, ex);
+//            }
+//        } else {
+//            String q = "UPDATE `oss`.`serviceattachmentname` SET `ServA_Name` = ?,`notes` = ?,`typeFile` = ?,`haveFile` = ? WHERE `ServiceAttachmentName_ID` = " + id + " ;";
+//
+//            System.out.println(q);
+//            try {
+//                DB data = new DB();
+//                PreparedStatement p = data.prepareStatement(q);
+//                p.setString(1, name);
+//                //p.setBinaryStream(1, saveFileInDisk());
+//                p.setString(2, notes);
+//                p.setString(3, nameFile);
+//                p.setString(4, haveFile);
+//                p.executeUpdate();
+//            } catch (SQLException ex) {
+//                Logger.getLogger(ServiceAttachmentName.class.getName()).log(Level.SEVERE, null, ex);
+//            } catch (ClassNotFoundException ex) {
+//                Logger.getLogger(ServiceAttachmentName.class.getName()).log(Level.SEVERE, null, ex);
+//            }
+//        }
+//
+//    }
 
     public void deleteFromDB() {
 
@@ -215,49 +216,49 @@ public class ServiceAttachmentName implements Serializable {
 
     }
 
-    public void addAttachToDBwithFile() {
-
-        String q = "INSERT INTO serviceattachmentname VALUES(null,?,?,?,?,?);";
-        System.out.println(q);
-
-        nameFile = file.getFileName();
-        try {
-            DB data = new DB();
-            PreparedStatement s = data.prepareStatement(q);
-            s.setString(1, name);
-            s.setBinaryStream(2, saveFileInDisk());
-            s.setString(3, notes);
-
-            s.setString(4, nameFile);
-
-            s.setString(5, haveFile);
-            s.executeUpdate();
-        } catch (SQLException ex) {
-            Logger.getLogger(ServiceAttachmentName.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (ClassNotFoundException ex) {
-            Logger.getLogger(ServiceAttachmentName.class.getName()).log(Level.SEVERE, null, ex);
-        }
-
-    }
-
-    public void addUploadFile(FileUploadEvent file) {
-        this.file = file.getFile();
-        if (this.file != null) {
-            System.out.println(this.file.getFileName());
-
-        }
-
-    }
-
-    public UploadedFile getFile() {
-        return file;
-    }
-
-    public void setFile(UploadedFile file) {
-        System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>in set>>>>>>>>>>>>>>>>>>>>>>" + file.getFileName());
-        this.file = file;
-
-    }
+//    public void addAttachToDBwithFile() {
+//
+//        String q = "INSERT INTO serviceattachmentname VALUES(null,?,?,?,?,?);";
+//        System.out.println(q);
+//
+//        nameFile = file.getFileName();
+//        try {
+//            DB data = new DB();
+//            PreparedStatement s = data.prepareStatement(q);
+//            s.setString(1, name);
+//            s.setBinaryStream(2, saveFileInDisk());
+//            s.setString(3, notes);
+//
+//            s.setString(4, nameFile);
+//
+//            s.setString(5, haveFile);
+//            s.executeUpdate();
+//        } catch (SQLException ex) {
+//            Logger.getLogger(ServiceAttachmentName.class.getName()).log(Level.SEVERE, null, ex);
+//        } catch (ClassNotFoundException ex) {
+//            Logger.getLogger(ServiceAttachmentName.class.getName()).log(Level.SEVERE, null, ex);
+//        }
+//
+//    }
+//
+//    public void addUploadFile(FileUploadEvent file) {
+//        this.file = file.getFile();
+//        if (this.file != null) {
+//            System.out.println(this.file.getFileName());
+//
+//        }
+//
+//    }
+//
+//    public UploadedFile getFile() {
+//        return file;
+//    }
+//
+//    public void setFile(UploadedFile file) {
+//        System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>in set>>>>>>>>>>>>>>>>>>>>>>" + file.getFileName());
+//        this.file = file;
+//
+//    }
 
     public String getNameFile() {
         return nameFile;
@@ -275,82 +276,82 @@ public class ServiceAttachmentName implements Serializable {
         this.haveFile = haveFile;
     }
 
-    private InputStream saveFileInDisk() {
-        try {
-            InputStream inp = file.getInputstream();
-
-            byte[] inputByte = new byte[inp.available()];
-
-            inp.read(inputByte);
-
-            byte[] outputCipher = Crypto.dec(Cipher.ENCRYPT_MODE, "foreanderDowntop", inputByte);
-//            byte[] outputfinal = Crypto.dec(Cipher.DECRYPT_MODE, "foreanderDowntop", outputCipher);
-//            System.out.println("-------------------------------------");
-//            for (int i = 0; i < outputfinal.length; i++) {
-//                byte b = outputfinal[i];
-//                System.out.print(b);
-//            }
-//            System.out.println("");
-            InputStream inputForData = new ByteArrayInputStream(outputCipher);
-//            String q = "UPDATE serviceattachmentname SET File = ? WHERE (ServiceAttachmentName_ID = 11);";
-//            try {
-//                DB d = new DB();
-//                if(outputCipher!=null)
-//                d.writeFile(q, inputForData);
-//                else
-//                    System.out.println("output is null");
-//                
-//                
-//                
-//                
-//                
-//            } catch (SQLException ex) {
-//                Logger.getLogger(ServiceAttachmentName.class.getName()).log(Level.SEVERE, null, ex);
-//            } catch (ClassNotFoundException ex) {
-//                Logger.getLogger(ServiceAttachmentName.class.getName()).log(Level.SEVERE, null, ex);
-//            }
-            return inputForData;
-
-        } catch (IOException ex) {
-            Logger.getLogger(ServiceAttachmentName.class.getName()).log(Level.SEVERE, null, ex);
-        }
+//    private InputStream saveFileInDisk() {
 //        try {
-//           InputStream initialStream = file.getInputstream();
-//            byte[] buffer = new byte[initialStream.available()];
-//            initialStream.read(buffer);
-//            File test = new File(System.getProperty("user.dir")+"/oss");
-//            if(!test.isDirectory()){
-//                test.mkdir();
-//            }
-//            File targetFile = new File(System.getProperty("user.dir")+"/oss/tmep.txt");
-//            
-//            OutputStream outStream = new FileOutputStream(targetFile);
-//            outStream.write(buffer);
-//            
-//            File f = new File(System.getProperty("user.dir")+"/" + file.getFileName());
-//            f.createNewFile();
-//            Crypto.fileProcessor(Cipher.ENCRYPT_MODE, "foreanderDowntop", targetFile, f);
-////             File test = new File("E:/oss/decription" + file.getFileName());
-////            test.createNewFile();
-////            Crypto.fileProcessor(Cipher.DECRYPT_MODE, "foreanderDowntop", f, test);
+//            InputStream inp = file.getInputstream();
 //
-//           
-//            outStream.close();
-//            targetFile.delete();
+//            byte[] inputByte = new byte[inp.available()];
 //
+//            inp.read(inputByte);
 //
+//            byte[] outputCipher = Crypto.dec(Cipher.ENCRYPT_MODE, "foreanderDowntop", inputByte);
+////            byte[] outputfinal = Crypto.dec(Cipher.DECRYPT_MODE, "foreanderDowntop", outputCipher);
+////            System.out.println("-------------------------------------");
+////            for (int i = 0; i < outputfinal.length; i++) {
+////                byte b = outputfinal[i];
+////                System.out.print(b);
+////            }
+////            System.out.println("");
+//            InputStream inputForData = new ByteArrayInputStream(outputCipher);
+////            String q = "UPDATE serviceattachmentname SET File = ? WHERE (ServiceAttachmentName_ID = 11);";
+////            try {
+////                DB d = new DB();
+////                if(outputCipher!=null)
+////                d.writeFile(q, inputForData);
+////                else
+////                    System.out.println("output is null");
+////                
+////                
+////                
+////                
+////                
+////            } catch (SQLException ex) {
+////                Logger.getLogger(ServiceAttachmentName.class.getName()).log(Level.SEVERE, null, ex);
+////            } catch (ClassNotFoundException ex) {
+////                Logger.getLogger(ServiceAttachmentName.class.getName()).log(Level.SEVERE, null, ex);
+////            }
+//            return inputForData;
 //
-//            System.out.println("uploaded pdf");
-//        } catch (IOException e) {
-//            System.out.println(e.getMessage());
+//        } catch (IOException ex) {
+//            Logger.getLogger(ServiceAttachmentName.class.getName()).log(Level.SEVERE, null, ex);
 //        }
-        return null;
-    }
-
-    @Override
-    public String toString() {
-        return "ServiceAttachmentName{" + "id=" + id + ", name=" + name + ", notes=" + notes + ", file=" + file + ", nameFile=" + nameFile + ", fileDownload=" + fileDownload + ", haveFile=" + haveFile + '}';
-    }
+////        try {
+////           InputStream initialStream = file.getInputstream();
+////            byte[] buffer = new byte[initialStream.available()];
+////            initialStream.read(buffer);
+////            File test = new File(System.getProperty("user.dir")+"/oss");
+////            if(!test.isDirectory()){
+////                test.mkdir();
+////            }
+////            File targetFile = new File(System.getProperty("user.dir")+"/oss/tmep.txt");
+////            
+////            OutputStream outStream = new FileOutputStream(targetFile);
+////            outStream.write(buffer);
+////            
+////            File f = new File(System.getProperty("user.dir")+"/" + file.getFileName());
+////            f.createNewFile();
+////            Crypto.fileProcessor(Cipher.ENCRYPT_MODE, "foreanderDowntop", targetFile, f);
+//////             File test = new File("E:/oss/decription" + file.getFileName());
+//////            test.createNewFile();
+//////            Crypto.fileProcessor(Cipher.DECRYPT_MODE, "foreanderDowntop", f, test);
+////
+////           
+////            outStream.close();
+////            targetFile.delete();
+////
+////
+////
+////            System.out.println("uploaded pdf");
+////        } catch (IOException e) {
+////            System.out.println(e.getMessage());
+////        }
+//        return null;
+//    }
+//
+//    @Override
+//    public String toString() {
+//        return "ServiceAttachmentName{" + "id=" + id + ", name=" + name + ", notes=" + notes + ", file=" + file + ", nameFile=" + nameFile + ", fileDownload=" + fileDownload + ", haveFile=" + haveFile + '}';
+//    }
 
     public boolean haveFileToupload() {
         if (haveFile != null) {
@@ -383,7 +384,14 @@ public class ServiceAttachmentName implements Serializable {
         }
     }
         
-    
+//    public void error() {
+//        FacesContext.getCurrentInstance().addMessage(null, new FacesMessage(FacesMessage.SEVERITY_ERROR, "Error!", "Upload All the Files needed"));
+//
+//      //  FacesMessage message = new FacesMessage(FacesMessage.SEVERITY_INFO, "Error!", "Please upload files");
+//      //  PrimeFaces.current().dialog().showMessageDynamic(message);
+//      
+//   
+//    }
 
     public void updatewithoutFile() {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.

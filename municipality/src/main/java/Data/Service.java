@@ -35,10 +35,15 @@ public class Service implements Serializable {
     
     List<HaveServiceAttachment> haveServiceAttachments;
 
+    List<ServiceAttachmentName> attachment ;
+    List<ServiceAttachmentName> attwhithFile ;
+    
     public Service() {
         this.department = new Department();
         this.section = new Section();
         haveServiceAttachments = new ArrayList<HaveServiceAttachment>();
+        attachment = new ArrayList<ServiceAttachmentName>();
+        attwhithFile = new ArrayList<ServiceAttachmentName>();
     }
 
     public Service(int id, String name, double cost, int days, String status, Department department, Section section, String note) {
@@ -51,7 +56,8 @@ public class Service implements Serializable {
         this.section = section;
         this.note = note;
         haveServiceAttachments = new ArrayList<HaveServiceAttachment>();
-
+        attachment = new ArrayList<ServiceAttachmentName>();
+        attwhithFile = new ArrayList<ServiceAttachmentName>();
     }
 
     public Service(int id, String name, double cost, int days, String status, String note) {
@@ -62,7 +68,8 @@ public class Service implements Serializable {
         this.status = status;
         this.note = note;
         haveServiceAttachments = new ArrayList<HaveServiceAttachment>();
-
+        attachment = new ArrayList<ServiceAttachmentName>();
+        attwhithFile = new ArrayList<ServiceAttachmentName>();
     }
 
     public int getId() {
@@ -308,4 +315,21 @@ public class Service implements Serializable {
         return "valid".equals(this.status);
     }
 
+	public List<ServiceAttachmentName> getAttachment() {
+		return attachment;
+	}
+
+	public void setAttachment(List<ServiceAttachmentName> attachment) {
+		this.attachment = attachment;
+	}
+
+	public List<ServiceAttachmentName> getAttwhithFile() {
+		return attwhithFile;
+	}
+
+	public void setAttwhithFile(List<ServiceAttachmentName> attwhithFile) {
+		this.attwhithFile = attwhithFile;
+	}
+
+    
 }

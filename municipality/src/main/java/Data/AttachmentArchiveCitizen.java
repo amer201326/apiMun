@@ -25,6 +25,9 @@ import org.primefaces.model.UploadedFile;
  */
 public class AttachmentArchiveCitizen implements Serializable {
 
+	public InputStream inputForData;
+
+
     int Atta_ArchiveC_ID;
     int Cit_ID;
     int ServiceAttachmentName_ID;
@@ -35,19 +38,48 @@ public class AttachmentArchiveCitizen implements Serializable {
     String nameAtt;
     String form;
     byte[] outputfinal;
+    
     public AttachmentArchiveCitizen(int Atta_ArchiveC_ID, int Cit_ID, int ServiceAttachmentName_ID, InputStream inputStream, String nameFile, String nameAtt) {
         this.Atta_ArchiveC_ID = Atta_ArchiveC_ID;
         this.Cit_ID = Cit_ID;
         this.ServiceAttachmentName_ID = ServiceAttachmentName_ID;
         this.nameAtt = nameAtt;
         this.nameFile = nameFile;
+    
         if (inputStream != null) {
             try {
                 si = inputStream.available();
                 byte[] inputByte = new byte[inputStream.available()];
                 inputStream.read(inputByte);
-                outputfinal = Crypto.dec(Cipher.DECRYPT_MODE, "foreanderDowntop", inputByte);
-                InputStream inputForData = new ByteArrayInputStream(outputfinal);
+                byte[] outputfinal = Crypto.dec(Cipher.DECRYPT_MODE, "foreanderDowntop", inputByte);
+                this.inputForData = new ByteArrayInputStream(outputfinal);
+
+                fileDownload = new DefaultStreamedContent(inputForData, "file", nameFile);
+            } catch (IOException ex) {
+                Logger.getLogger(AttachmentArchiveCitizen.class.getName()).log(Level.SEVERE, null, ex);
+            }
+
+        } else {
+
+            System.out.println("no file no file no file no file ");
+        }
+    }
+    
+    public AttachmentArchiveCitizen(int Atta_ArchiveC_ID, int Cit_ID, int ServiceAttachmentName_ID, InputStream inputStream, String nameFile,String form, String nameAtt) {
+        this.Atta_ArchiveC_ID = Atta_ArchiveC_ID;
+        this.Cit_ID = Cit_ID;
+        this.ServiceAttachmentName_ID = ServiceAttachmentName_ID;
+        this.nameAtt = nameAtt;
+        this.nameFile = nameFile;
+        this.form = form;
+    
+        if (inputStream != null) {
+            try {
+                si = inputStream.available();
+                byte[] inputByte = new byte[inputStream.available()];
+                inputStream.read(inputByte);
+                byte[] outputfinal = Crypto.dec(Cipher.DECRYPT_MODE, "foreanderDowntop", inputByte);
+                this.inputForData = new ByteArrayInputStream(outputfinal);
 
                 fileDownload = new DefaultStreamedContent(inputForData, "file", nameFile);
             } catch (IOException ex) {
@@ -153,21 +185,21 @@ public class AttachmentArchiveCitizen implements Serializable {
         this.ServiceAttachmentName_ID = ServiceAttachmentName_ID;
     }
 
-    public UploadedFile getFile() {
-        return file;
-    }
-
-    public void setFile(UploadedFile file) {
-        this.file = file;
-    }
-
-    public StreamedContent getFileDownload() {
-        return fileDownload;
-    }
-
-    public void setFileDownload(StreamedContent fileDownload) {
-        this.fileDownload = fileDownload;
-    }
+//    public UploadedFile getFile() {
+//        return file;
+//    }
+//
+//    public void setFile(UploadedFile file) {
+//        this.file = file;
+//    }
+//
+//    public StreamedContent getFileDownload() {
+//        return fileDownload;
+//    }
+//
+//    public void setFileDownload(StreamedContent fileDownload) {
+//        this.fileDownload = fileDownload;
+//    }
 
     public String getNameFile() {
         return nameFile;

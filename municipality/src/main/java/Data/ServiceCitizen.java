@@ -43,7 +43,8 @@ public class ServiceCitizen implements Serializable {
     Citizen citizen;
     Department department;
     DecisionsDepartment decisionsDepartment = new DecisionsDepartment();
-
+    
+    public NotificationUser notificationUser;
     public List<AttachmentServiceCitizen> attachmentServiceCitizens = new ArrayList<AttachmentServiceCitizen>();
 
     public List<AttachmentServiceEmployee> attachmentServiceEmployees = new ArrayList<AttachmentServiceEmployee>();
@@ -61,7 +62,13 @@ public class ServiceCitizen implements Serializable {
         this.status = status;
         this.note = note;
     }
-
+    public ServiceCitizen(int Service_Citizen_ID, int Services_Provided_ID, int Cit_ID, String note) {
+        this.Service_Citizen_ID = Service_Citizen_ID;
+        this.Services_Provided_ID = Services_Provided_ID;
+        this.Cit_ID = Cit_ID;
+        this.note = note;
+    }
+    
     public ServiceCitizen(Service service, int Service_Citizen_ID, int Services_Provided_ID, int Cit_ID, String Date, String status, String note, Citizen citizen, Service_Job service_Job) {
         this.service = service;
         this.Service_Citizen_ID = Service_Citizen_ID;
@@ -92,8 +99,8 @@ public class ServiceCitizen implements Serializable {
 
         Services_Provided_ID = service.id;
 
-        idMaxSC = getMaxId_service_citizen(Cit_ID);
-        idMaxSC++;
+//        idMaxSC = getMaxId_service_citizen(Cit_ID);
+//        idMaxSC++;
 
         int idMaxAAC = getMaxId_attachment_archive_citizen();
         idMaxAAC++;
@@ -149,7 +156,7 @@ public class ServiceCitizen implements Serializable {
             for (DepartmentPaths d : departments) {
                 DecisionsDepartment decisionsDepartment = new DecisionsDepartment(d.id,
                         d.order, Services_Provided_ID, Cit_ID,
-                        idMaxSC, "notdone", 0, "", "", Date);
+                        idMaxSC, "notdone", 0, "", "", Date, "");
 
                 decisionsDepartment.addToDB();
                 decisionsDepartments.add(decisionsDepartment);
@@ -169,6 +176,9 @@ public class ServiceCitizen implements Serializable {
             }
 
             buildjobsPathOfthisService(idMaxSC, decisionsDepartments, decisionSections, decisionsJobs);
+            q = "INSERT INTO `oss`.`notificationuser` (`Service_Citizen_ID`, `Cit_ID`, `show`) VALUES (" + idMaxSC + ", " + Cit_ID + ", 'no');";
+            System.out.println(q);
+            data.write(q);
 
             q = "commit;";
             System.out.println(q);
@@ -608,7 +618,7 @@ public class ServiceCitizen implements Serializable {
 
             for (DecisionsJob decisionsJob : minDecjob) {
                 System.out.println(decisionsJob);
-                Service_Job servicejob = new Service_Job(idMaxSC, Services_Provided_ID, Cit_ID, decisionsJob.job.DepId, decisionsJob.job.sectionID, decisionsJob.job.id, decisionsJob.job.dOrder, decisionsJob.job.sOrder, decisionsJob.job.order, "notdone");
+                Service_Job servicejob = new Service_Job(idMaxSC, Services_Provided_ID, Cit_ID, decisionsJob.job.DepId, decisionsJob.job.sectionID, decisionsJob.job.id, decisionsJob.job.dOrder, decisionsJob.job.sOrder, decisionsJob.job.order, "notdone", "no");
 
                 servicejob.addToDataBase();
             }
@@ -617,8 +627,8 @@ public class ServiceCitizen implements Serializable {
     }
 
 ///////////////////////////////employee
-    public void ContineuInPath(int empID) {
-
+    public void ContineuInPath(Employee emp) {
+        int empID = emp.emp_id;
         DB db;
         try {
             db = new DB();
@@ -669,7 +679,7 @@ public class ServiceCitizen implements Serializable {
                     sectionCounter++;
                 }
             }
-
+            
             if (sectionCounter == 0) {
                 q = "UPDATE `oss`.`decisions_department` SET `Status` = 'show' WHERE (`Dep_ID` = " + service_Job.Dep_ID + ") and (`Order_Departmant` = " + service_Job.Order_Departmant + ") "
                         + "and (`Services_Provided_ID` = " + service_Job.Services_Provided_ID + ") "
@@ -687,6 +697,16 @@ public class ServiceCitizen implements Serializable {
             for (AttachmentServiceEmployee attachmentServiceEmployee : attachmentServiceEmployees) {
                 attachmentServiceEmployee.addToDataBase();
             }
+            if (!importantCommentIsNO) {
+                q = "UPDATE `oss`.`notificationuser` SET `type` = 'e', `action` = 'accept', `from` = '" + emp.job_name + "', `date` = '" + decisionsJob.date + "' WHERE (`Service_Citizen_ID` = '" + service_Job.Service_Citizen_ID + "') and (`Cit_ID` = '" + service_Job.Cit_ID + "');";
+                System.out.println(q);
+                db.write(q);
+            } else {
+                q = "UPDATE `oss`.`notificationuser` SET `type` = 'e', `action` = 'reject', `from` = '" + emp.job_name + "', `date` = '" + decisionsJob.date + "' WHERE (`Service_Citizen_ID` = '" + service_Job.Service_Citizen_ID + "') and (`Cit_ID` = '" + service_Job.Cit_ID + "');";
+                System.out.println(q);
+                db.write(q);
+                importantCommentIsNO = false;
+            }
 
             q = "commit;";
             //q = "rollback;";
@@ -700,6 +720,7 @@ public class ServiceCitizen implements Serializable {
                 db = new DB();
                 db.write(q);
 
+                Logger.getLogger(ShoeServiceCitizemEmpManeger.class.getName()).log(Level.SEVERE, null, ex);
             } catch (SQLException ex1) {
                 Logger.getLogger(ServiceCitizen.class.getName()).log(Level.SEVERE, null, ex1);
             } catch (ClassNotFoundException ex1) {
@@ -731,16 +752,20 @@ public class ServiceCitizen implements Serializable {
         }
 
     }
+    public boolean importantCommentIsNO = false;
 
-    public void ContineuInPathReject(int empID) {
+    public void ContineuInPathReject(Employee emp) {
+        int empID = emp.emp_id;
+        DB db;
         try {
             JobPath jobPath = new JobPath(service_Job.Dep_ID, service_Job.Sec_ID, service_Job.Job_ID, Services_Provided_ID, service_Job.Order_Departmant, service_Job.Order_Section, service_Job.Order_Job);
             String importantComment = jobPath.getImportantCommentFromDataBase();
 
             if ("no".equals(importantComment)) {
-                ContineuInPath(empID);
+                importantCommentIsNO = true;
+                ContineuInPath(emp);
             } else {
-                DB db = new DB();
+                db = new DB();
 
                 String q = "start transaction;";
                 db.write(q);
@@ -755,12 +780,41 @@ public class ServiceCitizen implements Serializable {
                 decisionsJob.idEmployee = empID;
                 decisionsJob.status = "reject";
                 decisionsJob.updateNotDone();
+                q = "UPDATE `oss`.`notificationuser` SET `type` = 'e', `action` = 'reject', `from` = '" + emp.job_name + "', `date` = '" + decisionsJob.date + "' WHERE (`Service_Citizen_ID` = '" + service_Job.Service_Citizen_ID + "') and (`Cit_ID` = '" + service_Job.Cit_ID + "');";
+                System.out.println(q);
+                db.write(q);
 
+                q = "commit;";
+                //q = "rollback;";
+                System.out.println(q);
+                db.write(q);
             }
         } catch (ClassNotFoundException ex) {
-            Logger.getLogger(ServiceCitizen.class.getName()).log(Level.SEVERE, null, ex);
+            try {
+                String q = "rollback;";
+                System.out.println(q);
+                db = new DB();
+                db.write(q);
+                Logger.getLogger(ServiceCitizen.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (SQLException ex1) {
+                Logger.getLogger(ServiceCitizen.class.getName()).log(Level.SEVERE, null, ex1);
+            } catch (ClassNotFoundException ex1) {
+                Logger.getLogger(ServiceCitizen.class.getName()).log(Level.SEVERE, null, ex1);
+            }
+
         } catch (SQLException ex) {
-            Logger.getLogger(ServiceCitizen.class.getName()).log(Level.SEVERE, null, ex);
+
+            try {
+                String q = "rollback;";
+                System.out.println(q);
+                db = new DB();
+                db.write(q);
+                Logger.getLogger(ServiceCitizen.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (SQLException ex1) {
+                Logger.getLogger(ServiceCitizen.class.getName()).log(Level.SEVERE, null, ex1);
+            } catch (ClassNotFoundException ex1) {
+                Logger.getLogger(ServiceCitizen.class.getName()).log(Level.SEVERE, null, ex1);
+            }
         }
     }
 
@@ -936,7 +990,7 @@ public class ServiceCitizen implements Serializable {
 
             for (DecisionsJob decisionsJob : minDecjob) {
                 System.out.println(decisionsJob);
-                Service_Job servicejob = new Service_Job(Service_Citizen_ID, Services_Provided_ID, Cit_ID, decisionsJob.job.DepId, decisionsJob.job.sectionID, decisionsJob.job.id, decisionsJob.job.dOrder, decisionsJob.job.sOrder, decisionsJob.job.order, "notdone");
+                Service_Job servicejob = new Service_Job(Service_Citizen_ID, Services_Provided_ID, Cit_ID, decisionsJob.job.DepId, decisionsJob.job.sectionID, decisionsJob.job.id, decisionsJob.job.dOrder, decisionsJob.job.sOrder, decisionsJob.job.order, "notdone", "no");
 
                 servicejob.addToDataBase();
             }
@@ -971,7 +1025,7 @@ public class ServiceCitizen implements Serializable {
         this.decisionsDepartment = decisionsDepartment;
     }
 
-    public void desdepartment() {
+    public void desdepartment(Employee emp) {
         try {
             DB db = new DB();
             String q = "start transaction;";
@@ -979,7 +1033,11 @@ public class ServiceCitizen implements Serializable {
             db.write(q);
             decisionsDepartment.date = LocalDate.now().toString();
             decisionsDepartment.updateState();
-
+            Department dep = GetFromDB.getDepartmentById(""+emp.dep_id);
+            q = "UPDATE `oss`.`notificationuser` SET `type` = 'h', `action` = '"+decisionsDepartment.decision+"', `from` = '" + dep.nameA + "', `date` = '" + decisionsDepartment.date + "' WHERE "
+                    + "(`Service_Citizen_ID` = '" + Service_Citizen_ID + "') and (`Cit_ID` = '" + Cit_ID + "');";
+            System.out.println(q);
+            db.write(q);
             q = "SELECT * FROM oss.decisions_department where Services_Provided_ID=" + Services_Provided_ID + " and  Cit_ID=" + Cit_ID + " and  Service_Citizen_ID =" + Service_Citizen_ID + ";";
 
             System.out.println(q);
@@ -994,11 +1052,14 @@ public class ServiceCitizen implements Serializable {
                     break;
                 }
             }
-            System.out.println("flag for done service is = "+ flag);
+            System.out.println("flag for done service is = " + flag);
             if (flag) {
                 q = "UPDATE service_citizen SET status = 'done' WHERE (Service_Citizen_ID = " + Service_Citizen_ID + ") and (Services_Provided_ID = " + Services_Provided_ID + ") and (Cit_ID = " + Cit_ID + ");";
                 System.out.println(q);
                 db.write(q);
+                q = "UPDATE `oss`.`notificationuser` SET `type` = 's', `action` = 'done', `from` = 's', `date` = '" + decisionsDepartment.date + "' WHERE "
+                    + "(`Service_Citizen_ID` = '" + Service_Citizen_ID + "') and (`Cit_ID` = '" + Cit_ID + "');";
+            System.out.println(q);
             } else {
                 System.out.println("------- d-d-d-d-d-d-d---------------------------------------");
 
@@ -1020,13 +1081,12 @@ public class ServiceCitizen implements Serializable {
                 System.out.println("------- d-d-d-d-d-d-d---------------------------------------");
                 nextjobsPathOfthisService(departments, sections, jobs);
 
-                
             }
-            
+
             q = "commit;";
-                //q = "rollback;";
+            //q = "rollback;";
             System.out.println(q);
-                db.write(q);
+            db.write(q);
 
         } catch (SQLException ex) {
             try {
@@ -1056,5 +1116,23 @@ public class ServiceCitizen implements Serializable {
     public boolean sizeAttachment() {
         return !attachment.isEmpty();
     }
+
+    public NotificationUser getNotificationUser() {
+        return notificationUser;
+    }
+
+    public void setNotificationUser(NotificationUser notificationUser) {
+        this.notificationUser = notificationUser;
+    }
+
+    public boolean isImportantCommentIsNO() {
+        return importantCommentIsNO;
+    }
+
+    public void setImportantCommentIsNO(boolean importantCommentIsNO) {
+        this.importantCommentIsNO = importantCommentIsNO;
+    }
+    
+    
 
 }
